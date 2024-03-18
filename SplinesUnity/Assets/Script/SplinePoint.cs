@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class SplinePoint : MonoBehaviour
 {
-    public GameObject prePoint;
-    public GameObject postPoint;
+    public Transform prePoint;
+    public Transform postPoint;
 
     private void Start()
     {
         Transform[] children = gameObject.GetComponentsInChildren<Transform>();
         if (children.Length >= 2)
         {
-            prePoint = children[1].gameObject;
-            postPoint = children[2].gameObject;
+            prePoint = children[1];
+            postPoint = children[2];
         }
     }
 }
