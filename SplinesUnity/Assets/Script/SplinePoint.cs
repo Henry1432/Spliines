@@ -16,4 +16,9 @@ public class SplinePoint : MonoBehaviour
             postPoint = children[2];
         }
     }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawSphere(transform.position, 0.5f);
+    }
 }

@@ -6,8 +6,13 @@ using UnityEngine;
 public class SplineGenerator : MonoBehaviour
 {
     public List<SplinePoint> points = new List<SplinePoint>();
+    public List<Spline> splines = new List<Spline>();
+    [SerializeField] private float n; //Number of Segments
+
+    [SerializeField] private GameObject SplinesChildHolder;
+
     [SerializeField] float t; //Delete (probobly)
-    public GameObject p; //Delete
+    //public GameObject p; //Delete
     public bool test; //Delete
 
     
@@ -16,8 +21,8 @@ public class SplineGenerator : MonoBehaviour
         t = Mathf.Clamp01(t);
         if (test)
         {
-            //test = false;
-            p.transform.position = GetPoint(points[0], points[1]);
+            test = false;
+            CreateSpline(points[0], points[1]);
         }
     }
 
@@ -26,11 +31,33 @@ public class SplineGenerator : MonoBehaviour
         //Gizmos.DrawLine(p.transform.position, p.transform.position + GetDirection(points[0], points[1]).normalized * 0.5f);
     }
     //user interface
-    Vector3 GetDirection(SplinePoint p1, SplinePoint p2)
+    public void CreateSpline(SplinePoint p0, SplinePoint p1)
+    {
+        GameObject splineObj = new GameObject();
+        splineObj.name = "spline" + SplinesChildHolder.transform.childCount;
+        splineObj.transform.parent = SplinesChildHolder.transform;
+        Spline spline = splineObj.AddComponent<Spline>();
+
+        t = 0;
+        float tn = 1 / n;
+
+        while (t <= 1)
+        {
+            t = Mathf.Clamp01(t);
+            spline.AddPoint(GetPoint(p0, p1), GetDirection(p0, p1));
+
+            t += tn;
+        }
+        spline.FixLists();
+
+        splines.Add(spline);
+    }
+
+    public Vector3 GetDirection(SplinePoint p1, SplinePoint p2)
     {
         return GetDirection(p1.transform.position, p1.postPoint.position, p2.prePoint.position, p2.transform.position, t);
     }
-    Vector3 GetPoint(SplinePoint p1, SplinePoint p2)
+    public Vector3 GetPoint(SplinePoint p1, SplinePoint p2)
     {
         return GetPoint(p1.transform.position, p1.postPoint.position, p2.prePoint.position, p2.transform.position, t);
     }
