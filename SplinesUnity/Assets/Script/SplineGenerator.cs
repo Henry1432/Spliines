@@ -1,29 +1,57 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class SplineGenerator : MonoBehaviour
 {
     public List<SplinePoint> points = new List<SplinePoint>();
+    [SerializeField] private float segments; //Number of Segments
+    [SerializeField] private float t;
+
     public List<Spline> splines = new List<Spline>();
-    [SerializeField] private float n; //Number of Segments
+    [SerializeField] private GameObject splinesChildHolder;
+    public bool closedEdit;
+    private bool closed;
 
-    [SerializeField] private GameObject SplinesChildHolder;
+    private void Start()
+    {
+        if(splinesChildHolder == null)
+        {
+            splinesChildHolder = GameObject.FindGameObjectWithTag("SplineHolder");
+        }
+        pointCheck();
+    }
 
-    [SerializeField] float t; //Delete (probobly)
-    //public GameObject p; //Delete
-    public bool test; //Delete
-
-    
     private void Update()
     {
+        pointCheck();
         t = Mathf.Clamp01(t);
-        if (test)
+        if (closed)
         {
-            test = false;
-            CreateSpline(points[0], points[1]);
+            for (int i = 0; points.Count > i; i++)
+            {
+                if (i >= 1)
+                {
+                    CreateSpline(points[i - 1], points[i]);
+                }
+            }
+            CreateSpline(points[points.Count - 1], points[0]);
         }
+        else
+        {
+            for (int i = 0; points.Count > i; i++)
+            {
+                if (i >= 1)
+                {
+                    CreateSpline(points[i - 1], points[i]);
+                }
+            }
+        }
+
+
+        closed = closedEdit;
     }
 
     private void OnDrawGizmos()
@@ -34,12 +62,13 @@ public class SplineGenerator : MonoBehaviour
     public void CreateSpline(SplinePoint p0, SplinePoint p1)
     {
         GameObject splineObj = new GameObject();
-        splineObj.name = "spline" + SplinesChildHolder.transform.childCount;
-        splineObj.transform.parent = SplinesChildHolder.transform;
+        splineObj.name = "spline" + splinesChildHolder.transform.childCount;
+        splineObj.transform.parent = splinesChildHolder.transform;
         Spline spline = splineObj.AddComponent<Spline>();
+        spline.splineGenerator = this;
 
         t = 0;
-        float tn = 1 / n;
+        float tn = 1 / segments;
 
         while (t <= 1)
         {
@@ -106,4 +135,14 @@ public class SplineGenerator : MonoBehaviour
         return p;
     }
 
+    private void pointCheck()
+    {
+        points.Clear();
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            SplinePoint point = transform.GetChild(i).GetComponent<SplinePoint>();
+            if (point)
+                points.Add(point);
+        }
+    }
 }

@@ -6,6 +6,6 @@ public class subPointRender : MonoBehaviour
 {
     private void OnDrawGizmos()
     {
-        Gizmos.DrawSphere(transform.position, 0.25f);
+        Gizmos.DrawSphere(transform.position, 0.125f);
     }
 }

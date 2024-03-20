@@ -5,8 +5,21 @@ using UnityEngine;
 
 public class Spline : MonoBehaviour
 {
+    public SplineGenerator splineGenerator;
     public List<Vector3> points = new List<Vector3>();
     public List<Vector3> direction = new List<Vector3>();
+
+    private void LateUpdate()
+    {
+        StartCoroutine(DestroyEndOfFrame());
+    }
+
+    IEnumerator DestroyEndOfFrame()
+    {
+        yield return new WaitForEndOfFrame();
+        splineGenerator.splines.Remove(this);
+        Destroy(this.gameObject);
+    }
 
     private void OnDrawGizmos()
     {
@@ -25,9 +38,14 @@ public class Spline : MonoBehaviour
     }
     public void FixLists()
     {
-        //points.Remove(points.First());
         points.Remove(points.Last());
-        //direction.Remove(direction.First());
         direction.Remove(direction.Last());
+    }
+
+    ~Spline()
+    {
+        if(splineGenerator.splines.Contains(this))
+        {
+        }
     }
 }
