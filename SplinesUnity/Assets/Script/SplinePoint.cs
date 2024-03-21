@@ -13,12 +13,15 @@ public class SplinePoint : MonoBehaviour
         if (children.Length >= 2)
         {
             prePoint = children[1];
+            prePoint.GetComponent<subPointRender>().pre = true;
             postPoint = children[2];
+            postPoint.GetComponent<subPointRender>().pre = false;
         }
     }
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawSphere(transform.position, 0.25f);
+        Gizmos.color = Color.black;
+        Gizmos.DrawSphere(transform.position, 0.125f);
     }
 }

@@ -11,15 +11,16 @@ public class SplineGenerator : MonoBehaviour
     [SerializeField] private float t;
 
     public List<Spline> splines = new List<Spline>();
-    [SerializeField] private GameObject splinesChildHolder;
+    [SerializeField] private GameObject subSplines;
     public bool closedEdit;
     private bool closed;
+    private int splineEditIndex = 0;
 
     private void Start()
     {
-        if(splinesChildHolder == null)
+        if(subSplines == null)
         {
-            splinesChildHolder = GameObject.FindGameObjectWithTag("SplineHolder");
+            subSplines = GameObject.FindGameObjectWithTag("SplineHolder");
         }
         pointCheck();
     }
@@ -28,6 +29,7 @@ public class SplineGenerator : MonoBehaviour
     {
         pointCheck();
         t = Mathf.Clamp01(t);
+        splineEditIndex = 0;
         if (closed)
         {
             for (int i = 0; points.Count > i; i++)
@@ -49,7 +51,15 @@ public class SplineGenerator : MonoBehaviour
                 }
             }
         }
-
+        if(splineEditIndex < splines.Count)
+        {
+            Debug.Log("Pop");
+            for(int i = splines.Count - 1; i >= splineEditIndex; i--)
+            {
+                splines[i].DeleteSpline();
+                splines.Remove(splines.Last());
+            }
+        }
 
         closed = closedEdit;
     }
@@ -61,11 +71,25 @@ public class SplineGenerator : MonoBehaviour
     //user interface
     public void CreateSpline(SplinePoint p0, SplinePoint p1)
     {
-        GameObject splineObj = new GameObject();
-        splineObj.name = "spline" + splinesChildHolder.transform.childCount;
-        splineObj.transform.parent = splinesChildHolder.transform;
-        Spline spline = splineObj.AddComponent<Spline>();
-        spline.splineGenerator = this;
+        Spline spline;
+        bool newSpline = true;
+        if (splineEditIndex >= splines.Count)
+        {
+            GameObject splineObj = new GameObject();
+            splineObj.name = "spline" + subSplines.transform.childCount;
+            splineObj.transform.parent = subSplines.transform;
+            spline = splineObj.AddComponent<Spline>();
+            spline.splineGenerator = this;
+            spline.editIndex = 0;
+        }
+        else
+        {
+            //Debug.Log(splineEditIndex);
+            spline = splines[splineEditIndex];
+            spline.splineGenerator = this;
+            spline.editIndex = 0;
+            newSpline = false;
+        }
 
         t = 0;
         float tn = 1 / segments;
@@ -77,9 +101,18 @@ public class SplineGenerator : MonoBehaviour
 
             t += tn;
         }
-        spline.FixLists();
+        if(spline.points.Count > spline.editIndex)
+        {
+            spline.points.RemoveRange(0, 2);
+            spline.direction.RemoveRange(0, 2);
+        }
+        if(newSpline)
+        {
+            spline.FixLists();
+            splines.Add(spline);
+        }
+        splineEditIndex++;
 
-        splines.Add(spline);
     }
 
     public Vector3 GetDirection(SplinePoint p1, SplinePoint p2)

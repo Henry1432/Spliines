@@ -8,8 +8,9 @@ public class Spline : MonoBehaviour
     public SplineGenerator splineGenerator;
     public List<Vector3> points = new List<Vector3>();
     public List<Vector3> direction = new List<Vector3>();
+    public int editIndex = 0;
 
-    private void LateUpdate()
+    public void DeleteSpline()
     {
         StartCoroutine(DestroyEndOfFrame());
     }
@@ -28,13 +29,31 @@ public class Spline : MonoBehaviour
 
     public void AddPoint(Vector3 point, Vector3 dir)
     {
-        if (points.Count > 0)
+        if (editIndex >= points.Count - 1)
         {
+            if (points.Count > 0)
+            {
+                points.Add(point);
+                direction.Add(dir);
+                editIndex++;
+            }
             points.Add(point);
             direction.Add(dir);
+            editIndex++;
         }
-        points.Add(point);
-        direction.Add(dir);
+        else
+        {
+            points[editIndex] = point;
+            direction[editIndex] = dir;
+            editIndex++;
+            if(editIndex > 1)
+            {
+                points[editIndex] = point;
+                direction[editIndex] = dir;
+                editIndex++;
+            }
+
+        }
     }
     public void FixLists()
     {
