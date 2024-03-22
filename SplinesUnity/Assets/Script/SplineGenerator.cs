@@ -16,6 +16,8 @@ public class SplineGenerator : MonoBehaviour
     private bool closed;
     private int splineEditIndex = 0;
 
+    public List<(string, int)> keys = new List<(string, int)>();
+
     private void Start()
     {
         if(subSplines == null)
@@ -30,30 +32,19 @@ public class SplineGenerator : MonoBehaviour
         pointCheck();
         t = Mathf.Clamp01(t);
         splineEditIndex = 0;
+        for (int i = 0; points.Count > i; i++)
+        {
+            if (i >= 1)
+            {
+                CreateSpline(points[i - 1], points[i]);
+            }
+        }
         if (closed)
         {
-            for (int i = 0; points.Count > i; i++)
-            {
-                if (i >= 1)
-                {
-                    CreateSpline(points[i - 1], points[i]);
-                }
-            }
             CreateSpline(points[points.Count - 1], points[0]);
-        }
-        else
-        {
-            for (int i = 0; points.Count > i; i++)
-            {
-                if (i >= 1)
-                {
-                    CreateSpline(points[i - 1], points[i]);
-                }
-            }
         }
         if(splineEditIndex < splines.Count)
         {
-            Debug.Log("Pop");
             for(int i = splines.Count - 1; i >= splineEditIndex; i--)
             {
                 splines[i].DeleteSpline();
@@ -64,10 +55,66 @@ public class SplineGenerator : MonoBehaviour
         closed = closedEdit;
     }
 
-    private void OnDrawGizmos()
+    public Spline getNextSpline(string key, bool continuous)
     {
-        //Gizmos.DrawLine(p.transform.position, p.transform.position + GetDirection(points[0], points[1]).normalized * 0.5f);
+        int index = -1;
+        foreach((string, int) k in keys)
+        {
+            if(k.Item1 == key)
+            {
+                index = keys.IndexOf(k);
+            }
+        }
+        if (index != -1)
+        {
+            if (keys[index].Item2 >= splines.Count)
+            {
+                keys[index] = (keys[index].Item1, continuous ? 1 : splines.Count);
+            }
+            else
+            {
+                keys[index] = (keys[index].Item1, keys[index].Item2 + 1);
+            }
+            return splines[keys[index].Item2 - 1];
+        }
+        else
+        {
+            keys.Add((key, 1));
+
+            return splines[keys.Last().Item2 - 1];
+        }
     }
+    public Spline getNextSpline(string key, bool continuous, out bool check)
+    {
+        check = false;
+        int index = -1;
+        foreach ((string, int) k in keys)
+        {
+            if (k.Item1 == key)
+            {
+                index = keys.IndexOf(k);
+            }
+        }
+        if (index != -1)
+        {
+            if (keys[index].Item2 >= splines.Count)
+            {
+                keys[index] = (keys[index].Item1, continuous ? 1 : splines.Count);
+                check = true;
+            }
+            else
+            {
+                keys[index] = (keys[index].Item1, keys[index].Item2 + 1);
+            }
+            return splines[keys[index].Item2 - 1];
+        }
+        else
+        {
+            keys.Add((key, 1));
+            return splines[keys.Last().Item2 - 1];
+        }
+    }
+
     //user interface
     public void CreateSpline(SplinePoint p0, SplinePoint p1)
     {
