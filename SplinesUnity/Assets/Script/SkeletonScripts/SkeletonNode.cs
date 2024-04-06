@@ -26,25 +26,29 @@ public class SkeletonNode : MonoBehaviour
     {
         //globalTrans = SetGlobal();
 
-        //showPos = globalTrans.GetPosition();
-        //showRotation = globalTrans.rotation;
-        //showScale = globalTrans.lossyScale;
         if(globalTrans.ValidTRS())
         {
             transform.position = globalTrans.GetPosition();
             transform.rotation = globalTrans.rotation;
             transform.localScale = globalTrans.lossyScale;
+
+
+            showPos = localTrans.GetPosition();
+            showRotation = localTrans.rotation;
+            showScale = localTrans.lossyScale;
         }
     }
 
     public Matrix4x4 SetGlobal()
     {
+        Matrix4x4 returnMat = new Matrix4x4(localTrans.GetColumn(0), localTrans.GetColumn(1), localTrans.GetColumn(2), localTrans.GetColumn(3));
         if(parentIndex != -1) 
-            return localTrans * SkeletonBase.instance.allNodes[parentIndex].globalTrans;
+            return returnMat * SkeletonBase.instance.allNodes[parentIndex].globalTrans;
         return localTrans;
     }
+
     /*
-    private Matrix4x4 SetGlobal()
+    public Matrix4x4 SetGlobal()
     {
         if (parentIndex != -1)
         {

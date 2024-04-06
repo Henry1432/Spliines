@@ -11,6 +11,7 @@ public class SkeletonBase : MonoBehaviour
     public List<SkeletonNode> allNodes = new List<SkeletonNode>();
     public SkeletonNode baseNode;
 
+
     private void Awake()
     {
         if(instance == null)
@@ -45,6 +46,9 @@ public class SkeletonBase : MonoBehaviour
 
     private void Update()
     {
+        //handle local rotations based on joint angles here so that the rotation doesnt cascade down.
+            //it was happening because when you used sourcenode rotation it would do that for all below doubling and doubling the rotation
+
         SetGlobals(baseNode);
     }
 
