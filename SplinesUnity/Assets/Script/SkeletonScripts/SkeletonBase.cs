@@ -7,8 +7,17 @@ using UnityEngine;
 public class SkeletonBase : MonoBehaviour
 {
     //this should be the thing that tracks all the nodes and how I interact with each joint
+    public static SkeletonBase instance;
     public List<SkeletonNode> allNodes = new List<SkeletonNode>();
-    private SkeletonNode baseNode;
+    public SkeletonNode baseNode;
+
+    private void Awake()
+    {
+        if(instance == null)
+            instance = this;
+        else
+            Destroy(this);
+    }
 
     private void Start()
     {
@@ -30,7 +39,6 @@ public class SkeletonBase : MonoBehaviour
         {
             SetParentJoint(joint);
         }
-        Debug.Log("stop");
     }
 
     private void SetParentJoint(Joint joint)
