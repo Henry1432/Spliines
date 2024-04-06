@@ -39,6 +39,24 @@ public class SkeletonBase : MonoBehaviour
         {
             SetParentJoint(joint);
         }
+
+        SetGlobals(baseNode);
+    }
+
+    private void Update()
+    {
+        SetGlobals(baseNode);
+    }
+
+    private void SetGlobals(SkeletonNode node)
+    {
+        node.globalTrans = node.SetGlobal();
+        Joint[] thisJoints = node.gameObject.GetComponents<Joint>();
+
+        foreach (Joint joint in thisJoints)
+        {
+            SetGlobals(joint.target);
+        }
     }
 
     private void SetParentJoint(Joint joint)

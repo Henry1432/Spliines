@@ -10,15 +10,16 @@ public class Joint : MonoBehaviour
 
     private Vector3 targetScale;
     private Quaternion targetRotation;
-    private Vector3 normal, startNormal;
+    private Vector3 normal, baseNormal, startNormal;
     private float dist;
-    public Vector3 test;
+
 
     private void Awake()
     {
         sourse = gameObject.GetComponent<SkeletonNode>();
         transform.position = sourse.transform.position;
         normal = (target.transform.position - sourse.transform.position).normalized;
+        baseNormal = normal;
         startNormal = normal;
         dist = Vector3.Distance(target.transform.position, sourse.transform.position);
         targetScale = target.transform.localScale;
@@ -29,13 +30,36 @@ public class Joint : MonoBehaviour
 
     private void Update()
     {
-        normal = (Quaternion.Euler(angle) * startNormal).normalized;
-        targetRotation = Quaternion.LookRotation(normal);
+        setLocal();
     }
 
     public void setLocal()
     {
+        normal = (sourse.globalTrans.ValidTRS() ? (sourse.globalTrans.rotation * (Quaternion.Euler(angle) * baseNormal)) : (Quaternion.Euler(angle) * baseNormal)).normalized;
         Vector3 newPos = normal * dist;
+        Joint[] joints = target.GetComponents<Joint>();
+        Quaternion normalRotation = Quaternion.FromToRotation(baseNormal, normal);
+        foreach (Joint joint in joints)
+        {
+            joint.editStartNormalDirectionDown(normalRotation);
+        }
+        targetRotation = normalRotation;
         target.localTrans.SetTRS(newPos, targetRotation, targetScale);
+    }
+
+    public void editStartNormalDirectionDown(Quaternion q)
+    {
+        baseNormal = q * startNormal;
+        normal = (q) * normal;
+        Joint[] joints = target.GetComponents<Joint>();
+        foreach (Joint joint in joints)
+        {
+            joint.editStartNormalDirectionDown(q);
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawLine(transform.position, transform.position + normal);
     }
 }

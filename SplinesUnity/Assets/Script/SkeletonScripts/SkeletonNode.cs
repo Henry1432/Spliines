@@ -19,21 +19,31 @@ public class SkeletonNode : MonoBehaviour
         {
             localTrans.SetTRS(Vector3.zero, Quaternion.identity, Vector3.one);
         }
+        globalTrans = localTrans;
     }
 
     private void FixedUpdate()
     {
-        globalTrans = SetGlobal();
+        //globalTrans = SetGlobal();
 
         //showPos = globalTrans.GetPosition();
         //showRotation = globalTrans.rotation;
         //showScale = globalTrans.lossyScale;
-
-        transform.position = globalTrans.GetPosition();
-        transform.rotation = globalTrans.rotation;
-        transform.localScale = globalTrans.lossyScale;
+        if(globalTrans.ValidTRS())
+        {
+            transform.position = globalTrans.GetPosition();
+            transform.rotation = globalTrans.rotation;
+            transform.localScale = globalTrans.lossyScale;
+        }
     }
 
+    public Matrix4x4 SetGlobal()
+    {
+        if(parentIndex != -1) 
+            return localTrans * SkeletonBase.instance.allNodes[parentIndex].globalTrans;
+        return localTrans;
+    }
+    /*
     private Matrix4x4 SetGlobal()
     {
         if (parentIndex != -1)
@@ -73,4 +83,5 @@ public class SkeletonNode : MonoBehaviour
         }
         return localTrans;
     }
+    */
 }
