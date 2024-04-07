@@ -6,11 +6,11 @@ public class Joint : MonoBehaviour
 {
     //should hold the info about where the joint is and the 2 nodes its a joint between
     public SkeletonNode sourse, target;
-    public Vector3 angle = Vector3.zero;
+    public Vector3 normal;
+    public Quaternion targetRotation;
+    public List<Quaternion> rotations = new List<Quaternion>();
 
     private Vector3 targetScale;
-    private Quaternion targetRotation;
-    private Vector3 normal;
     private float dist;
 
 
@@ -28,23 +28,11 @@ public class Joint : MonoBehaviour
 
     private void Update()
     {
+        transform.position = sourse.transform.position;
+
         Vector3 newPos = normal * dist;
         target.localTrans.SetTRS(newPos, targetRotation, targetScale);
     }
-
-    //public void setLocal()
-    //{
-    //    normal = (sourse.localTrans.ValidTRS() ? (sourse.localTrans.rotation * (Quaternion.Euler(angle) * baseNormal)) : (Quaternion.Euler(angle) * baseNormal)).normalized;
-    //    Vector3 newPos = normal * dist;
-    //    Quaternion normalRotation = Quaternion.FromToRotation(baseNormal, normal);
-    //    //Joint[] joints = target.GetComponents<Joint>();
-    //    //foreach (Joint joint in joints)
-    //    //{
-    //    //    //joint.editStartNormalDirectionDown(normalRotation);
-    //    //}
-    //    targetRotation = normalRotation;
-    //    target.localTrans.SetTRS(newPos, targetRotation, targetScale);
-    //}
 
     public void editStartNormalDirectionDown(Quaternion q)
     {

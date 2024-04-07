@@ -1,8 +1,10 @@
+using Palmmedia.ReportGenerator.Core;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class SkeletonBase : MonoBehaviour
 {
@@ -10,6 +12,10 @@ public class SkeletonBase : MonoBehaviour
     public static SkeletonBase instance;
     public List<SkeletonNode> allNodes = new List<SkeletonNode>();
     public SkeletonNode baseNode;
+    public List<Joint> joints = new List<Joint>();
+    public List<Vector3> angles = new List<Vector3>();
+    public List<Vector3> baseNormals = new List<Vector3>();
+    public List<Vector3> startNormals = new List<Vector3>();
 
 
     private void Awake()
@@ -36,21 +42,76 @@ public class SkeletonBase : MonoBehaviour
 
         Joint[] thisJoints = baseNode.gameObject.GetComponents<Joint>();
         
+
         foreach (Joint joint in thisJoints)
         {
             SetParentJoint(joint);
         }
-
+        startNormals.AddRange(baseNormals);
         SetGlobals(baseNode);
     }
 
     private void Update()
     {
         //handle local rotations based on joint angles here so that the rotation doesnt cascade down.
-            //it was happening because when you used sourcenode rotation it would do that for all below doubling and doubling the rotation
+        //it was happening because when you used sourcenode rotation it would do that for all below doubling and doubling the rotation
 
+        SetJoints();
         SetGlobals(baseNode);
+
+
     }
+
+    public void SetJoints()
+    {
+        foreach(Joint joint in joints)
+        {
+            joint.rotations.Clear();
+        }
+
+        if(joints.Count == angles.Count && joints.Count > 0)
+        {
+            for(int i = 0; i < joints.Count; i++)
+            {
+                joints[i].normal = (Quaternion.Euler(angles[i]) * baseNormals[i]);
+                Quaternion jointRotation = Quaternion.FromToRotation(baseNormals[i], joints[i].normal);
+                joints[i].targetRotation = jointRotation;
+                EditJointsNormalDown(joints[i], jointRotation);
+            }
+        }
+    }
+    private void EditJointsNormalDown(Joint j, Quaternion r)
+    {
+        int index = joints.IndexOf(j);
+        baseNormals[index] = r * startNormals[index];
+        foreach(Quaternion q in joints[index].rotations)
+        {
+            baseNormals[index] = q * baseNormals[index];
+        }
+        joints[index].rotations.Add(r);
+        Joint[] tJoints = j.target.gameObject.GetComponents<Joint>();
+        foreach (Joint joint in tJoints)
+        {
+            if(joints.Contains(joint))
+            {
+                EditJointsNormalDown(joint, r);
+            }
+        }
+    }
+
+    //public void setLocal()
+    //{
+    //    normal = (sourse.localTrans.ValidTRS() ? (sourse.localTrans.rotation * (Quaternion.Euler(angle) * baseNormal)) : (Quaternion.Euler(angle) * baseNormal)).normalized;
+    //    Vector3 newPos = normal * dist;
+    //    Quaternion normalRotation = Quaternion.FromToRotation(baseNormal, normal);
+    //    //Joint[] joints = target.GetComponents<Joint>();
+    //    //foreach (Joint joint in joints)
+    //    //{
+    //    //    //joint.editStartNormalDirectionDown(normalRotation);
+    //    //}
+    //    targetRotation = normalRotation;
+    //    target.localTrans.SetTRS(newPos, targetRotation, targetScale);
+    //}
 
     private void SetGlobals(SkeletonNode node)
     {
@@ -65,9 +126,17 @@ public class SkeletonBase : MonoBehaviour
 
     private void SetParentJoint(Joint joint)
     {
+        if (!joints.Contains(joint))
+        {
+            joints.Add(joint);
+            angles.Add(new Vector3());
+            baseNormals.Add(joint.normal);
+        }
+
         SkeletonNode sourceNode = joint.sourse.gameObject.GetComponent<SkeletonNode>();
         joint.target.parentIndex = allNodes.IndexOf(sourceNode);
         Joint testJoint = joint.target.gameObject.GetComponent<Joint>();
+
         if (testJoint != null)
         {
             SetParentJoint(testJoint);
