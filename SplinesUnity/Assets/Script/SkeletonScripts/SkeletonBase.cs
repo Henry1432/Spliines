@@ -99,20 +99,6 @@ public class SkeletonBase : MonoBehaviour
         }
     }
 
-    //public void setLocal()
-    //{
-    //    normal = (sourse.localTrans.ValidTRS() ? (sourse.localTrans.rotation * (Quaternion.Euler(angle) * baseNormal)) : (Quaternion.Euler(angle) * baseNormal)).normalized;
-    //    Vector3 newPos = normal * dist;
-    //    Quaternion normalRotation = Quaternion.FromToRotation(baseNormal, normal);
-    //    //Joint[] joints = target.GetComponents<Joint>();
-    //    //foreach (Joint joint in joints)
-    //    //{
-    //    //    //joint.editStartNormalDirectionDown(normalRotation);
-    //    //}
-    //    targetRotation = normalRotation;
-    //    target.localTrans.SetTRS(newPos, targetRotation, targetScale);
-    //}
-
     private void SetGlobals(SkeletonNode node)
     {
         node.globalTrans = node.SetGlobal();
