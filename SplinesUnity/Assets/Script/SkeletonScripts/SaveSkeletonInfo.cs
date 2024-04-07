@@ -7,21 +7,13 @@ using UnityEngine;
 public class SaveSkeletonInfo : MonoBehaviour
 {
     public List<Vector3> angles = new List<Vector3>();
-
     public float timeStamp = 0f;
 
-    public bool test;
 
-    private void Update()
+    public void SetAnglesFromStamp(float stamp)
     {
-        if(test)
-        {
-            test = !test;
-            angles = SkeletonBase.instance.angles;
-            fInSkeletonInfo("Data\\" + timeStamp +".txt");
-
-            SkeletonBase.instance.angles = angles;
-        }
+        timeStamp = stamp;
+        fInSkeletonInfo("Data\\" + timeStamp + ".txt");
     }
 
     public void fInSkeletonInfo(string fileName)
