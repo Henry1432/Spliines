@@ -13,7 +13,7 @@ public class SaveSkeletonInfo : MonoBehaviour
     public void SetAnglesFromStamp(float stamp)
     {
         timeStamp = stamp;
-        fInSkeletonInfo("Data\\" + timeStamp + ".txt");
+        fInSkeletonInfo("Assets\\Data\\" + timeStamp + ".txt");
     }
 
     public void fInSkeletonInfo(string fileName)
