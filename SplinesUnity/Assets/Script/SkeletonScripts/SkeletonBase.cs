@@ -56,6 +56,8 @@ public class SkeletonBase : MonoBehaviour
         //handle local rotations based on joint angles here so that the rotation doesnt cascade down.
         //it was happening because when you used sourcenode rotation it would do that for all below doubling and doubling the rotation
 
+        baseNode.localTrans = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+
         SetJoints();
         SetGlobals(baseNode);
 
